@@ -6,10 +6,15 @@
 //   });
 var appName = "com.stuartquin.pass";
 var regex = /www\./
-
+var passTree = {};
+ 
 chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
   if (change.status == "complete") {
     runPass(tab);
+  } else {
+    if (Object.keys(passTree).length === 0) {
+      loadTree();
+    }
   }
 });
 
@@ -24,14 +29,26 @@ var sendMessage = function(message) {
   });
 };
 
+var loadTree = function() {
+  chrome.runtime.sendNativeMessage(appName,
+                                   {action: "tree"},
+                                   function(response) {
+                                    passTree = response;
+                                    console.log(response);
+                                   });
+}
+
 var runPass = function(tab) {
   var parser = document.createElement("a");
   parser.href = tab.url;
+  var domain = parser.hostname.replace(regex, "");
 
-  chrome.runtime.sendNativeMessage(appName,
-                                   {text: parser.hostname.replace(regex, "")},
+  if (passTree[domain]) {
+    chrome.runtime.sendNativeMessage(appName,
+                                   {domain: domain},
                                    function(response) {
                                       console.log("Received ", response);
                                       sendMessage(response);
                                    });
+  }
 };

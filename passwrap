@@ -18,6 +18,13 @@ if sys.platform == "win32":
   msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
   msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
+
+FRAGMENTS = [
+    "\xe2\x94\x82\xc2\xa0\xc2\xa0",
+    "\xe2\x94\x9c\xe2\x94\x80\xe2\x94\x80",
+    "\xe2\x94\x94\xe2\x94\x80\xe2\x94\x80"
+]
+
 # Helper function that sends a message to the webapp.
 def send_message(message):
     sys.stdout.write(struct.pack('I', len(message)))
@@ -41,11 +48,20 @@ def read_thread_func(queue):
         text = sys.stdin.read(text_length).decode('utf-8')
         if queue:
             message = json.loads(text)
-            queue.put(run_pass(message))
+            queue.put(parse_action(message))
         else:
             # In headless mode just send an echo message back.
             send_message('{"echo": %s}' % text)
 
+def parse_action(message):
+    if "action" in message:
+        if message["action"] == "tree":
+            return json.dumps(parse_tree())
+
+    if "domain" in message:
+        return run_pass(message["domain"])
+
+    sys.exit(0)
 
 def reply(message):
     try:
@@ -54,9 +70,9 @@ def reply(message):
     except IOError:
         sys.exit(1)
 
-def run_pass(message):
+def run_pass(domain):
     try:
-        out = subprocess.check_output(["pass", message["text"]])
+        out = subprocess.check_output(["pass", domain])
         lines = out.strip().split("\n")
         username = None
         password = None
@@ -67,7 +83,7 @@ def run_pass(message):
                 username = username_line[0][9:].strip()
         return json.dumps({"username": username, "password": password})
     except subprocess.CalledProcessError:
-        return '{"ERROR": "' + message["text"] + '"}'
+        return '{"ERROR": "' + domain + '"}'
 
 def process(queue):
     while not queue.empty():
@@ -77,14 +93,44 @@ def process(queue):
 
         reply(msg)
 
-def parse_tree():
-    for x in cleaned:
-        if x.startswith("\xe2"):
-            items.append(item + "/" + re.sub(".*\\x80 ", "", x))
-        else:
-            items.append(x)
-            item = x
+def clean_node(node):
+    cleaned = node
+    for fragment in FRAGMENTS:
+        cleaned = cleaned.replace(fragment, "|").strip()
+    return cleaned
 
+def parse_tree():
+    parent = ""
+    out = subprocess.check_output(["pass"])
+    lines = out.split("\n")
+    cleaned = [clean_node(x) for x in lines]
+
+    level = 1
+    prev_level = 1
+    parents = ["Root"]
+    domains = {}
+
+    for x in cleaned:
+        bits = x.split("|")
+        domain = bits[-1].strip()
+        level = len(bits) - 1
+
+        if level == prev_level:
+            parents.pop()
+            parents.append(domain)
+
+        if level > prev_level:
+            parents.append(domain)
+
+        if level < prev_level:
+            parents = parents[:level]
+            parents.append(domain)
+
+        if len(parents):
+            domains[domain] = "/".join(parents[1:])
+        prev_level = level
+
+    return domains
 
 def main():
     queue = Queue.Queue()
