@@ -1,9 +1,3 @@
-// chrome.runtime.sendNativeMessage('com.stuartquin.pass',
-//   { text: "Hello" },
-//   function(response) {
-//     debugger;
-//     console.log("Received " + response);
-//   });
 var appName = "com.stuartquin.pass";
 var regex = /www\./
 var passTree = {};
