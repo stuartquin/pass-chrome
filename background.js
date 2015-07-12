@@ -39,7 +39,7 @@ var runPass = function(tab) {
 
   if (passTree[domain]) {
     chrome.runtime.sendNativeMessage(appName,
-                                   {domain: domain},
+                                   {domain: passTree[domain]},
                                    function(response) {
                                       console.log("Received ", response);
                                       sendMessage(response);
