@@ -1,10 +1,12 @@
 var appName = "com.stuartquin.pass";
 var regex = /www\./
 var passTree = {};
+var authAttempts = 0;
  
 chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
+  authAttempts = 0;
   if (change.status == "complete") {
-    runPass(tab);
+    lookupPassword(tab.url, sendMessage);
   } else {
     if (Object.keys(passTree).length === 0) {
       loadTree();
@@ -32,9 +34,9 @@ var loadTree = function() {
                                    });
 }
 
-var runPass = function(tab) {
+var lookupPassword = function(url, callback) {
   var parser = document.createElement("a");
-  parser.href = tab.url;
+  parser.href = url;
   var domain = parser.hostname.replace(regex, "");
 
   if (passTree[domain]) {
@@ -42,7 +44,24 @@ var runPass = function(tab) {
                                    {domain: passTree[domain]},
                                    function(response) {
                                       console.log("Received ", response);
-                                      sendMessage(response);
+                                      callback(response);
                                    });
   }
-};
+
+}
+
+chrome.webRequest.onAuthRequired.addListener(
+  function(details, callbackFn) {
+    console.log("onAuthRequired!", details, callbackFn);
+    if (authAttempts > 0) {
+      return callbackFn();
+    }
+    authAttempts++;
+
+    lookupPassword(details.url, function(result) {
+      callbackFn({authCredentials: result});
+    });
+  },
+  {urls: ["<all_urls>"]},
+  ['asyncBlocking']
+);
