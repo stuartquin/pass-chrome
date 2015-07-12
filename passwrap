@@ -1,0 +1,94 @@
+#!/usr/bin/python
+# Copyright (c) 2012 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+# A simple native messaging host. Shows a Tkinter dialog with incoming messages
+# that also allows to send message back to the webapp.
+import struct
+import sys
+import threading
+import Queue
+import json
+import subprocess
+
+# On Windows, the default I/O mode is O_TEXT. Set this to O_BINARY
+# to avoid unwanted modifications of the input/output streams.
+if sys.platform == "win32":
+  import os, msvcrt
+  msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
+  msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+
+# Helper function that sends a message to the webapp.
+def send_message(message):
+   # Write message size.
+  sys.stdout.write(struct.pack('I', len(message)))
+  # Write the message itself.
+  sys.stdout.write(message)
+  sys.stdout.flush()
+
+# Thread that reads messages from the webapp.
+def read_thread_func(queue):
+  message_number = 0
+  while 1:
+    # Read the message length (first 4 bytes).
+    text_length_bytes = sys.stdin.read(4)
+    if len(text_length_bytes) == 0:
+      if queue:
+        queue.put(None)
+      sys.exit(0)
+    # Unpack message length as 4 byte integer.
+    text_length = struct.unpack('i', text_length_bytes)[0]
+    # Read the text (JSON object) of the message.
+    text = sys.stdin.read(text_length).decode('utf-8')
+    if queue:
+      message = json.loads(text)
+      queue.put(run_pass(message))
+    else:
+      # In headless mode just send an echo message back.
+      send_message('{"echo": %s}' % text)
+
+
+def reply(message):
+  try:
+    send_message(message)
+    sys.exit(0)
+  except IOError:
+    sys.exit(1)
+
+def run_pass(message):
+  try:
+    out = subprocess.check_output(["pass", message["text"]])
+    lines = out.strip().split("\n")
+    username = None
+    password = None
+    if lines:
+      password = lines[0]
+      username_line = filter(lambda x: x.startswith("username:"), lines)
+      if username_line:
+          username = username_line[0][9:].strip()
+    return json.dumps({"username": username, "password": password})
+  except subprocess.CalledProcessError:
+    return '{"ERROR": "' + message["text"] + '"}'
+
+def process(queue):
+  while not queue.empty():
+    msg = queue.get_nowait()
+    if msg == None:
+      sys.exit(0)
+
+    reply(msg)
+
+
+def main():
+  queue = Queue.Queue()
+  thread = threading.Thread(target=read_thread_func, args=(queue,))
+  thread.daemon = True
+  thread.start()
+
+  while True:
+    process(queue)
+
+  sys.exit(0)
+
+if __name__ == '__main__':
+  main()
