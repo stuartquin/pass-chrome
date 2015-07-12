@@ -4,7 +4,7 @@ var validPasswordNames = ["password", "pass", "passwd"];
 
 var isPasswordField = function(input) {
   var type = input.type.toLowerCase();
-  return type === "password";
+  return input.offsetParent !== null && type === "password";
 };
 
 var isUsernameField = function(input) {
@@ -14,7 +14,6 @@ var isUsernameField = function(input) {
 };
 
 var inputs = Array.prototype.slice.call(document.getElementsByTagName("input"), 0 );
-
 var passwordEls = inputs.filter(isPasswordField);
 
 
