@@ -46,20 +46,25 @@ var lookupPassword = function(url, callback) {
                                       console.log("Received ", response);
                                       callback(response);
                                    });
+  } else {
+    callback();
   }
-
 }
 
 chrome.webRequest.onAuthRequired.addListener(
   function(details, callbackFn) {
     console.log("onAuthRequired!", details, callbackFn);
     if (authAttempts > 0) {
-      return callbackFn();
+      return callbackFn({cancel: true});
     }
     authAttempts++;
 
     lookupPassword(details.url, function(result) {
-      callbackFn({authCredentials: result});
+      if (result) {
+        callbackFn({authCredentials: result});
+      } else {
+        callbackFn({cancel: true});
+      }
     });
   },
   {urls: ["<all_urls>"]},
