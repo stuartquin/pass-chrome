@@ -13,11 +13,7 @@ var isUsernameField = function(input) {
   return type === "email" || validUsernameNames.indexOf(name) > -1;
 };
 
-var inputs = Array.prototype.slice.call(document.getElementsByTagName("input"), 0 );
-var passwordEls = inputs.filter(isPasswordField);
-
-
-var getBestUsernameField = function(passwordEl) {
+var getBestUsernameField = function(inputs, passwordEl) {
   var form = passwordEl.form;
   if (form) {
     for (var i = 0; i < validUsernameTypes.length; i++) {
@@ -32,17 +28,25 @@ var getBestUsernameField = function(passwordEl) {
   return usernameEls[0];
 }
 
+var fillFields = function(request) {
+  var passwordEl, usernameEl = null;
+  var inputs = Array.prototype.slice.call(document.getElementsByTagName("input"), 0 );
+  var passwordEls = inputs.filter(isPasswordField);
+
+  if (passwordEls.length) {
+    passwordEl = passwordEls[0];
+    passwordEl.value = request.password;
+    usernameEl = getBestUsernameField(inputs, passwordEl);
+
+    if (usernameEl) {
+      usernameEl.value = request.username;
+    }
+    return true;
+  } 
+  return false;
+}
+
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-    var passwordEl, usernameEl = null;
-
-    if (passwordEls.length) {
-      passwordEl = passwordEls[0];
-      passwordEl.value = request.password;
-      usernameEl = getBestUsernameField(passwordEl);
-
-      if (usernameEl) {
-        usernameEl.value = request.username;
-      }
-    } 
+    sendResponse(fillFields(request));
   });

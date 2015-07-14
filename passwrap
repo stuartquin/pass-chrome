@@ -10,6 +10,7 @@ import threading
 import Queue
 import json
 import subprocess
+from subprocess import PIPE, Popen
 
 # On Windows, the default I/O mode is O_TEXT. Set this to O_BINARY
 # to avoid unwanted modifications of the input/output streams.
@@ -57,9 +58,11 @@ def parse_action(message):
     if "action" in message:
         if message["action"] == "tree":
             return json.dumps(parse_tree())
+        if message["action"] == "add":
+            return pass_add(message["details"])
 
     if "domain" in message:
-        return run_pass(message["domain"])
+        return pass_lookup(message["domain"])
 
     sys.exit(0)
 
@@ -70,7 +73,18 @@ def reply(message):
     except IOError:
         sys.exit(1)
 
-def run_pass(domain):
+def pass_add(details):
+    domain = details["domain"]
+    username = details["username"]
+    password = details["password"]
+    try:
+        p1 = Popen(["pass", "insert", "-m", domain], stdin=PIPE)
+        p1.communicate("%s\n---\nusername: %s" % (password, username))
+        return json.dumps({"username": username, "password": password})
+    except subprocess.CalledProcessError:
+        return '{"ERROR": "' + domain + '"}'
+
+def pass_lookup(domain):
     try:
         out = subprocess.check_output(["pass", domain])
         lines = out.strip().split("\n")
