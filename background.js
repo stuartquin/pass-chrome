@@ -5,7 +5,7 @@ var authAttempts = 0;
 
 // In order of preference
 var passwordFormFields = ["password", "pass", "pw"];
-var usernameFormFields = ["username", "email", "login", "id", "acct", "user"];
+var usernameFormFields = ["username", "email", "login", "id", "acct", "user", "name"];
 var submittedFields = {};
 
 chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
@@ -129,6 +129,7 @@ var getLoginFields = function(request) {
 
       if (passwordField) {
         setAlertBadge(request.tabId);
+
         return {
           username: body.formData[usernameField],
           password: body.formData[passwordField]
@@ -141,11 +142,9 @@ var getLoginFields = function(request) {
 chrome.webRequest.onBeforeRequest.addListener(
   function(request) {
     var domain = getDomain(request.url);
-    if (!passTree[domain]) {
-      var fields = getLoginFields(request);
-      if (fields) {
-        submittedFields[domain] = fields;
-      } 
+    var fields = getLoginFields(request);
+    if (fields) {
+      submittedFields[domain] = fields;
     }
     return {cancel: false};
   },
