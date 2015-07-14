@@ -42,7 +42,7 @@ var fillFields = function(request) {
       usernameEl.value = request.username;
     }
     return true;
-  } 
+  }
   return false;
 }
 
