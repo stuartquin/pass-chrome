@@ -1,6 +1,8 @@
 var background = chrome.extension.getBackgroundPage();
 var submitEl = document.getElementById("add-btn");
-var reloadEl = document.getElementById("action-reload");
+var navReloadEl = document.getElementById("nav-reload");
+var navGenerateEl = document.getElementById("nav-generate");
+var navBackEl = document.getElementById("nav-back");
 var urlEl = document.getElementById("add-url");
 var usernameEl = document.getElementById("add-username");
 var passwordEl = document.getElementById("add-password");
@@ -10,15 +12,21 @@ submitEl.addEventListener("click", function(evt) {
   background.addLoginDetails(urlEl.value, usernameEl.value, passwordEl.value);
 });
 
-reloadEl.addEventListener("click", function(evt) {
+navReloadEl.addEventListener("click", function(evt) {
   background.loadTree();
 });
 
-var toggleView = function(viewId) {
-  views[currentView].style.display = "none";
-  views[viewId].style.display = "block";
-  currentView = viewId;
-}
+navGenerateEl.addEventListener("click", function(evt) {
+  switchView("generate");
+});
+
+navBackEl.addEventListener("click", function(evt) {
+  if (viewStack.length > 1) {
+    var current = viewStack.pop();
+    current.hide();
+    viewStack[viewStack.length - 1].show();
+  }
+});
 
 chrome.tabs.getSelected(null, function(tab) {
   var sites = background.getSiteInfo(tab.url);
@@ -43,6 +51,7 @@ var View = (function() {
   View.prototype.show = function() {
     this.el.style.display = "block";
   }
+
   return View;
 })();
 
@@ -53,6 +62,14 @@ var CreateView = (function() {
   }
   CreateView.prototype = new View();
   return CreateView;
+})();
+
+var GenerateView = (function() {
+  function GenerateView() {
+    this.el = document.getElementById("generate");
+  }
+  GenerateView.prototype = new View();
+  return GenerateView;
 })();
 
 
@@ -109,9 +126,19 @@ var BrowseView = (function() {
   return BrowseView;
 })();
 
+var switchView = function(view) {
+  if (viewStack.length) {
+    viewStack[viewStack.length - 1].hide();
+  }
+  views[view].show();
+  viewStack.push(views[view]);
+};
+
 var views = {
   "browse": new BrowseView(),
-  "create": new CreateView()
+  "create": new CreateView(),
+  "generate": new GenerateView(),
 }
 
-views["browse"].show();
+var viewStack = [];
+switchView("browse");
