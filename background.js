@@ -16,6 +16,9 @@ chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
   if (change.status == "complete") {
     currentSiteInfo = getSiteInfo(tab.url);
     lookupAndFill(currentSiteInfo.domain);
+    if (passTree[currentSiteInfo.domain]) {
+      setSuccessBadge(tab.id);
+    }
   } else {
     if (Object.keys(passTree).length === 0) {
       loadTree();
@@ -24,8 +27,8 @@ chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
 });
 
 var setSuccessBadge = function(tabId) {
-  chrome.browserAction.setBadgeText({text: "*", tabId: tabId});
-  chrome.browserAction.setBadgeBackgroundColor({color: "#22AA22", tabId: tabId});
+  chrome.browserAction.setBadgeText({text: " ", tabId: tabId});
+  chrome.browserAction.setBadgeBackgroundColor({color: "#D4EE9F", tabId: tabId});
 };
 
 var setAlertBadge = function(tabId) {
@@ -46,18 +49,14 @@ var getSiteInfo = function(url) {
   var domain = getDomain(url);
   return {
     domain: domain,
-    matches: [passTree[domain]] || [],
+    matches: (passTree[domain] ? [passTree[domain]] : []),
     submitted: submittedFields[domain] || {}
   };
 }
 
 var sendLoginDetails = function(message) {
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, message, function(response) {
-      if (response) {
-        setSuccessBadge(tabs[0].id);
-      }
-    });
+    chrome.tabs.sendMessage(tabs[0].id, message, function(response) {});
   });
 };
 

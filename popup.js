@@ -31,7 +31,7 @@ navBackEl.addEventListener("click", function(evt) {
 chrome.tabs.getSelected(null, function(tab) {
   var sites = background.getSiteInfo(tab.url);
 
-  if (sites.matches) {
+  if (sites.matches.length) {
     views["browse"].renderResults(sites.matches);
   }
 
