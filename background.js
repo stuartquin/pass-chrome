@@ -62,7 +62,9 @@ var sendLoginDetails = function(message) {
 };
 
 var lookupAndFill = function(domain) {
-  lookupPassword(domain, sendLoginDetails);
+  if (domain) {
+    lookupPassword(domain, sendLoginDetails);
+  }
 };
 
 var addLoginDetails = function(domain, username, password) {

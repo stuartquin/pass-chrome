@@ -71,9 +71,16 @@ var BrowseView = (function() {
     }, true);
 
     this.resultsEl.addEventListener('click', function(e) {
-      background.lookupAndFill(e.target.innerHTML);
+      var target = e.target;
+      var action = target.dataset.action;
+      if (action) {
+        if (action === "fill") {
+          background.lookupAndFill(target.dataset.domain);
+        }
+      }
     }, true);
   }
+
   BrowseView.prototype = new View();
 
   BrowseView.prototype.renderResult = function(result) {
@@ -81,7 +88,14 @@ var BrowseView = (function() {
     if (result === background.getCurrentSiteInfo().domain) {
       el.classList.add("detected-result");
     }
+    el.dataset.action = "fill";
+    el.dataset.domain = result;
     el.innerHTML = result;
+
+    // var viewBtn = document.createElement("button");
+    // viewBtn.dataset.action = "view";
+    // viewBtn.innerHTML = "v";
+    // el.appendChild(viewBtn);
     return el;
   }
 
