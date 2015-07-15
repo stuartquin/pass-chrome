@@ -8,11 +8,14 @@ var passwordFormFields = ["password", "pass", "pw"];
 var usernameFormFields = ["username", "email", "login", "id", "acct", "user", "name"];
 var submittedFields = {};
 
+var currentSiteInfo = {};
+
 chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
   authAttempts = 0;
 
   if (change.status == "complete") {
-    lookupPassword(getDomain(tab.url), sendLoginDetails);
+    currentSiteInfo = getSiteInfo(tab.url);
+    lookupAndFill(currentSiteInfo.domain);
   } else {
     if (Object.keys(passTree).length === 0) {
       loadTree();
@@ -35,11 +38,15 @@ var getSubmittedDetails = function(url) {
   return submittedFields[domain];
 }
 
+var getCurrentSiteInfo = function() {
+  return currentSiteInfo;
+};
+
 var getSiteInfo = function(url) {
   var domain = getDomain(url);
   return {
     domain: domain,
-    matches: passTree[domain] || [],
+    matches: [passTree[domain]] || [],
     submitted: submittedFields[domain] || {}
   };
 }
@@ -52,6 +59,10 @@ var sendLoginDetails = function(message) {
       }
     });
   });
+};
+
+var lookupAndFill = function(domain) {
+  lookupPassword(domain, sendLoginDetails);
 };
 
 var addLoginDetails = function(domain, username, password) {
@@ -138,6 +149,16 @@ var getLoginFields = function(request) {
     }
   }
 };
+
+/**
+ * Prefix search over tree
+ */
+var searchTree = function(term) {
+  var keys = Object.keys(passTree);
+  return keys.filter(function(key) {
+    return key.toLowerCase().indexOf(term.toLowerCase()) > -1;
+  }); 
+}
 
 chrome.webRequest.onBeforeRequest.addListener(
   function(request) {
