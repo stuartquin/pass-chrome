@@ -66,7 +66,18 @@ var CreateView = (function() {
 
 var GenerateView = (function() {
   function GenerateView() {
+    var self = this;
     this.el = document.getElementById("generate");
+    this.btnEl = document.getElementById("generate-btn");
+    this.passwordEl = document.getElementById("generated-password");
+
+    this.btnEl.addEventListener('click', function(e) {
+      background.generatePassword(function(result){
+        if (result && result.generated) {
+          self.passwordEl.value = result.generated; 
+        }
+      });
+    });
   }
   GenerateView.prototype = new View();
   return GenerateView;

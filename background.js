@@ -67,6 +67,11 @@ var lookupAndFill = function(domain) {
   }
 };
 
+var generatePassword = function(callback) {
+  var options = {};
+  chrome.runtime.sendNativeMessage(appName, {action: "generate", options: options}, callback);
+}
+
 var addLoginDetails = function(domain, username, password) {
   var details = {domain:domain, username:username, password:password};
   chrome.runtime.sendNativeMessage(appName,
