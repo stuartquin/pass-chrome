@@ -1,4 +1,4 @@
-[[#]] pass-chrome
+# pass-chrome
 
 A chrome browser extension for [pass](http://www.passwordstore.org/)
 
