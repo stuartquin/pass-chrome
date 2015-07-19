@@ -150,7 +150,7 @@ var GenerateView = (function() {
       "symbol": document.getElementById("generated-symbol")
     }
 
-    for (var i = 3; i < 100; i++) {
+    for (var i = 4; i < 100; i++) {
       var opt = document.createElement("option");
       opt.value = i;
       opt.innerText = i;

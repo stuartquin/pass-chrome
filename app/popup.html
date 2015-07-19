@@ -41,7 +41,7 @@
       <p>
       <label for="generated-len">Length:</label>
       <select id="generated-length" name="generate-len">
-        <option value="2">2</option>
+        <option value="3">3</option>
       </select>
       </p>
       <fieldset>
@@ -49,19 +49,21 @@
         <p>
           <label for"generated-capitalize">A-Z</label>
           <input type="checkbox"
+                 title="At least one capital letter"
                  id="generated-capitalize"
                  name="generated-capitalize"
                  checked="checked" />
           <label for"generated-capitalize">0-9</label>
           <input type="checkbox"
+                 title="At least one number"
                  id="generated-numeric"
                  name="generated-numeric"
                  checked="checked" />
           <label for"generated-capitalize">*$%</label>
           <input type="checkbox"
+                 title="At least one symbol"
                  id="generated-symbol"
-                 name="generated-symbol"
-                 checked="checked" />
+                 name="generated-symbol" />
         </p>
       </fieldset>
       <p>
