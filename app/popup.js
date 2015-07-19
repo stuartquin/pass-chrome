@@ -156,6 +156,9 @@ var BrowseView = (function() {
         if (action === "fill") {
           background.lookupAndFill(target.dataset.domain);
         }
+        if (action === "edit") {
+          View.switchView("create");
+        }
       }
     }, true);
   }
@@ -176,10 +179,13 @@ var BrowseView = (function() {
     el.dataset.domain = result;
     el.innerHTML = result;
 
-    // var viewBtn = document.createElement("button");
-    // viewBtn.dataset.action = "view";
-    // viewBtn.innerHTML = "v";
-    // el.appendChild(viewBtn);
+    var viewBtn = document.createElement("a");
+    viewBtn.dataset.action = "edit";
+    viewBtn.dataset.domain = result;
+    viewBtn.classList.add("view-domain");
+    viewBtn.classList.add("fa");
+    viewBtn.classList.add("fa-edit");
+    el.appendChild(viewBtn);
     return el;
   }
 

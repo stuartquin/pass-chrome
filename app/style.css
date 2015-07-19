@@ -57,3 +57,12 @@ li {
   height: 22px;
   margin: 0;
 }
+
+.view-domain {
+  float: right;
+  display: none;
+}
+
+li:hover a {
+  display: block;
+}
