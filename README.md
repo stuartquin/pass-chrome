@@ -21,7 +21,7 @@ communication
 * Drag and drop `app.crx` onto the page
 * Finally, to enable the native client support run
  
-[[```]]
+```
 ./install.sh
 ```
 
