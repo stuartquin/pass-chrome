@@ -1,9 +1,9 @@
 {
   "name": "com.stuartquin.pass",
   "description": "Pass",
-  "path": "/home/stuart/Projects/pass-chrome",
+  "path": "HOST_PATH",
   "type": "stdio",
   "allowed_origins": [
-    "chrome-extension://jmglhgfhfpemenoclhaghjokpbkoegfc/"
+    "chrome-extension://dooaogppdidkijbbpnomdllogahdoajg/"
   ]
 }
