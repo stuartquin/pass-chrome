@@ -9,7 +9,11 @@ var passwordEl = document.getElementById("add-password");
 
 
 submitEl.addEventListener("click", function(evt) {
-  background.addLoginDetails(urlEl.value, usernameEl.value, passwordEl.value);
+  background.addLoginDetails({
+    domain: urlEl.value, 
+    username: usernameEl.value, 
+    password: passwordEl.value
+  });
 });
 
 navReloadEl.addEventListener("click", function(evt) {

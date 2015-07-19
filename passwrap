@@ -48,23 +48,23 @@ def read_thread_func(queue):
         # Read the text (JSON object) of the message.
         text = sys.stdin.read(text_length).decode('utf-8')
         if queue:
-            message = json.loads(text)
-            queue.put(parse_action(message))
+            data = json.loads(text)
+            queue.put(parse_action(data))
         else:
             # In headless mode just send an echo message back.
             send_message('{"echo": %s}' % text)
 
-def parse_action(message):
-    if "action" in message:
-        if message["action"] == "tree":
+def parse_action(data):
+    if "action" in data:
+        message = data["message"]
+        if data["action"] == "tree":
             return json.dumps(parse_tree())
-        if message["action"] == "add":
-            return pass_add(message["details"])
-        if message["action"] == "generate":
-            return pass_generate(message["options"])
-
-    if "domain" in message:
-        return pass_lookup(message["domain"])
+        if data["action"] == "add":
+            return pass_add(message)
+        if data["action"] == "generate":
+            return pass_generate(message)
+        if data["action"] == "lookup":
+            return pass_lookup(message["domain"])
 
     sys.exit(0)
 

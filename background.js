@@ -10,22 +10,6 @@ var submittedFields = {};
 
 var currentSiteInfo = {};
 
-chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
-  authAttempts = 0;
-
-  if (change.status == "complete") {
-    currentSiteInfo = getSiteInfo(tab.url);
-    lookupAndFill(currentSiteInfo.domain);
-    if (passTree[currentSiteInfo.domain]) {
-      setSuccessBadge(tab.id);
-    }
-  } else {
-    if (Object.keys(passTree).length === 0) {
-      loadTree();
-    }
-  }
-});
-
 var setSuccessBadge = function(tabId) {
   chrome.browserAction.setBadgeText({text: " ", tabId: tabId});
   chrome.browserAction.setBadgeBackgroundColor({color: "#D4EE9F", tabId: tabId});
@@ -54,6 +38,12 @@ var getSiteInfo = function(url) {
   };
 }
 
+var getDomain = function(url) {
+  var parser = document.createElement("a");
+  parser.href = url;
+  return parser.hostname.replace(regex, "");
+}
+
 var sendLoginDetails = function(message) {
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     chrome.tabs.sendMessage(tabs[0].id, message, function(response) {});
@@ -66,66 +56,46 @@ var lookupAndFill = function(domain) {
   }
 };
 
+var sendNativeMessage = function(action, message, callback) {
+  chrome.runtime.sendNativeMessage(appName,
+                                   {action: action, message: message},
+                                   callback);
+};
+
 var generatePassword = function(callback) {
-  var options = {};
-  chrome.runtime.sendNativeMessage(appName, {action: "generate", options: options}, callback);
+  sendNativeMessage("generate", {}, callback);
 }
 
-var addLoginDetails = function(domain, username, password) {
+var addLoginDetails = function(message) {
   var details = {domain:domain, username:username, password:password};
-  chrome.runtime.sendNativeMessage(appName,
-                                   {action: "add",details: details},
-                                   function(response) {
-                                     console.log(response);
-                                   });
+  sendNativeMessage("add", message, function(response) {
+    console.log(response);
+  });
 };
 
 var loadTree = function() {
-  chrome.runtime.sendNativeMessage(appName,
-                                   {action: "tree"},
-                                   function(response) {
-                                    passTree = response;
-                                    console.log(response);
-                                   });
-}
-
-var getDomain = function(url) {
-  var parser = document.createElement("a");
-  parser.href = url;
-  return parser.hostname.replace(regex, "");
+  sendNativeMessage("tree", {}, function(response) {
+    passTree = response;
+  });
 }
 
 var lookupPassword = function(domain, callback) {
   if (passTree[domain]) {
-    chrome.runtime.sendNativeMessage(appName,
-                                   {domain: passTree[domain]},
-                                   function(response) {
-                                      callback(response);
-                                   });
+    sendNativeMessage("lookup", {domain: domain}, callback);
   } else {
     callback();
   }
 }
 
-chrome.webRequest.onAuthRequired.addListener(
-  function(details, callbackFn) {
-    console.log("onAuthRequired!", details, callbackFn);
-    if (authAttempts > 0) {
-      return callbackFn({cancel: true});
-    }
-    authAttempts++;
-
-    lookupPassword(getDomain(details.url), function(result) {
-      if (result) {
-        callbackFn({authCredentials: result});
-      } else {
-        callbackFn({cancel: true});
-      }
-    });
-  },
-  {urls: ["<all_urls>"]},
-  ['asyncBlocking']
-);
+/**
+ * Prefix search over tree
+ */
+var searchTree = function(term) {
+  var keys = Object.keys(passTree);
+  return keys.filter(function(key) {
+    return key.toLowerCase().indexOf(term.toLowerCase()) > -1;
+  }); 
+}
 
 var getKnownField = function(fields, knownFields) {
   var field = Object.keys(fields).filter(function(formField) {
@@ -157,15 +127,29 @@ var getLoginFields = function(request) {
 };
 
 /**
- * Prefix search over tree
+ * Called on each tab change
+ * Checks known information for a domain
  */
-var searchTree = function(term) {
-  var keys = Object.keys(passTree);
-  return keys.filter(function(key) {
-    return key.toLowerCase().indexOf(term.toLowerCase()) > -1;
-  }); 
-}
+chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
+  authAttempts = 0;
 
+  if (change.status == "complete") {
+    currentSiteInfo = getSiteInfo(tab.url);
+    lookupAndFill(currentSiteInfo.domain);
+    if (passTree[currentSiteInfo.domain]) {
+      setSuccessBadge(tab.id);
+    }
+  } else {
+    if (Object.keys(passTree).length === 0) {
+      loadTree();
+    }
+  }
+});
+
+/**
+ * Called when request made, if POST, check for known password/username
+ * fields
+ */
 chrome.webRequest.onBeforeRequest.addListener(
   function(request) {
     var domain = getDomain(request.url);
@@ -176,4 +160,27 @@ chrome.webRequest.onBeforeRequest.addListener(
     return {cancel: false};
   },
   {urls: ["<all_urls>"]},
-  ["requestBody"]);
+["requestBody"]);
+
+/**
+ * Handle Basic Auth Dialogs
+ */
+chrome.webRequest.onAuthRequired.addListener(
+  function(details, callbackFn) {
+    console.log("onAuthRequired!", details, callbackFn);
+    if (authAttempts > 0) {
+      return callbackFn({cancel: true});
+    }
+    authAttempts++;
+
+    lookupPassword(getDomain(details.url), function(result) {
+      if (result) {
+        callbackFn({authCredentials: result});
+      } else {
+        callbackFn({cancel: true});
+      }
+    });
+  },
+  {urls: ["<all_urls>"]},
+  ['asyncBlocking']
+);
