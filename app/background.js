@@ -51,7 +51,9 @@ var getDomain = function(url) {
  */
 var sendLoginDetails = function(message) {
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, message, function(response) {});
+    if (tabs[0] && message) {
+      chrome.tabs.sendMessage(tabs[0].id, message, function(response) {});
+    }
   });
 };
 
