@@ -31,9 +31,10 @@ mkdir -p "$TARGET_DIR"
 
 # Copy native messaging host manifest.
 cp "$DIR/$HOST_NAME.json" "$TARGET_DIR"
+cp "$DIR/passwrap" "$TARGET_DIR"
 
 # Update host path in the manifest.
-HOST_PATH=$DIR/native-messaging-example-host
+HOST_PATH=$TARGET_DIR/passwrap
 ESCAPED_HOST_PATH=${HOST_PATH////\\/}
 sed -i -e "s/HOST_PATH/$ESCAPED_HOST_PATH/" "$TARGET_DIR/$HOST_NAME.json"
 
