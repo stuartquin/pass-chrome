@@ -1,8 +1,5 @@
 var background = chrome.extension.getBackgroundPage();
 var submitEl = document.getElementById("add-btn");
-var navReloadEl = document.getElementById("nav-reload");
-var navGenerateEl = document.getElementById("nav-generate");
-var navBackEl = document.getElementById("nav-back");
 var urlEl = document.getElementById("add-url");
 var usernameEl = document.getElementById("add-username");
 var passwordEl = document.getElementById("add-password");
@@ -16,31 +13,54 @@ submitEl.addEventListener("click", function(evt) {
   });
 });
 
-navReloadEl.addEventListener("click", function(evt) {
-  background.loadTree();
-});
-
-navGenerateEl.addEventListener("click", function(evt) {
-  switchView("generate");
-});
-
-navBackEl.addEventListener("click", function(evt) {
-  if (viewStack.length > 1) {
-    var current = viewStack.pop();
-    current.hide();
-    viewStack[viewStack.length - 1].show();
-  }
-});
-
 var View = (function() {
   function View() {
+    this.parentEl = document.getElementById("views");
+    this.parentEl.addEventListener("click", function(e) {
+      var target = e.target;
+      var action = target.dataset.action;
+      if (action && View.navActions[action]) {
+        View.navActions[action](action);
+      }
+    });
   }
+  View.views = {};
+  View.viewStack = [];
+
+  View.register = function(view, instance) {
+    View.views[view] = instance;
+  };
+
+  View.get = function(view) {
+    return View.views[view];
+  }
+
+  View.switchView = function(view) {
+    if (View.viewStack.length) {
+      View.viewStack[View.viewStack.length - 1].hide();
+    }
+    View.views[view].show();
+    View.viewStack.push(View.views[view]);
+  };
+
+  View.navActions = {
+    "generate": View.switchView,
+    "reload": background.loadTree,
+    "back": function() {
+      if (View.viewStack.length > 1) {
+        View.viewStack.pop().hide();
+        View.viewStack[View.viewStack.length - 1].show();
+      }
+    }
+  };
+
   View.prototype.hide = function() {
     this.el.style.display = "none";
-  }
+  };
+
   View.prototype.show = function() {
     this.el.style.display = "block";
-  }
+  };
 
   return View;
 })();
@@ -127,28 +147,16 @@ var BrowseView = (function() {
   return BrowseView;
 })();
 
-var switchView = function(view) {
-  if (viewStack.length) {
-    viewStack[viewStack.length - 1].hide();
-  }
-  views[view].show();
-  viewStack.push(views[view]);
-};
-
-var views = {
-  "browse": new BrowseView(),
-  "create": new CreateView(),
-  "generate": new GenerateView(),
-}
-
-var viewStack = [];
+View.register("browse", new BrowseView());
+View.register("create", new CreateView());
+View.register("generate", new GenerateView());
 
 chrome.tabs.getSelected(null, function(tab) {
   var currentDomain = background.getDomainInfo(tab.url);
 
-  switchView("browse");
+  View.switchView("browse");
   if (currentDomain.matches.length) {
-    views["browse"].renderResults(currentDomain.matches);
+    View.get("browse").renderResults(currentDomain.matches);
   }
 
   if (currentDomain.submitted) {
@@ -156,7 +164,7 @@ chrome.tabs.getSelected(null, function(tab) {
     urlEl.value = currentDomain.domain;
     usernameEl.value = submitted.username;
     passwordEl.value = submitted.password;
-    switchView("create");
+    View.switchView("create");
   }
 });
 

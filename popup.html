@@ -6,7 +6,7 @@
 </head>
 <body>
 
-<div class="views">
+<div id="views">
   <div id="browse" class="view">
     <div class="content">
       <input type="text" placeholder="search" id="search"/>
@@ -15,9 +15,9 @@
         </ul>
       </div>
     </div>
-    <div class="nav">
-      <a href="#" id="nav-reload">reload</a>
-      <a href="#" id="nav-generate">generate password</a>
+    <div class="nav-bar">
+      <a href="#" class="nav" data-action="reload">reload</a>
+      <a href="#" class="nav" data-action="generate">generate password</a>
     </div>
   </div>
 
@@ -26,8 +26,8 @@
       <input type="text" placeholder="Password" id="generated-password"/>
       <button id="generate-btn">Generate</button>
     </div>
-    <div class="nav">
-      <a href="#" id="nav-back">&lt;Back</a>
+    <div class="nav-bar">
+      <a href="#" class="nav" data-action="back">&lt;Back</a>
     </div>
   </div>
   
@@ -47,7 +47,7 @@
       </div>
     </div>
     <div class="nav">
-      <a href="#" id="nav-back">&lt;Back</a>
+      <a href="#" class="nav" data-action="back">&lt;Back</a>
     </div>
   </div>
 </div>
