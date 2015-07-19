@@ -1,17 +1,5 @@
 var background = chrome.extension.getBackgroundPage();
-var submitEl = document.getElementById("add-btn");
-var urlEl = document.getElementById("add-url");
-var usernameEl = document.getElementById("add-username");
-var passwordEl = document.getElementById("add-password");
 
-
-submitEl.addEventListener("click", function(evt) {
-  background.addLoginDetails({
-    domain: urlEl.value, 
-    username: usernameEl.value, 
-    password: passwordEl.value
-  });
-});
 
 var View = (function() {
   function View() {
@@ -33,7 +21,12 @@ var View = (function() {
 
   View.get = function(view) {
     return View.views[view];
-  }
+  };
+
+  View.resetView = function(view) {
+    View.viewStack = [];
+    View.switchView(view);
+  };
 
   View.switchView = function(view) {
     if (View.viewStack.length) {
@@ -68,9 +61,33 @@ var View = (function() {
 
 var CreateView = (function() {
   function CreateView() {
+    var self = this;
     this.el = document.getElementById("create");
+    this.urlEl = document.getElementById("add-url");
+    this.usernameEl = document.getElementById("add-username");
+    this.passwordEl = document.getElementById("add-password");
+    this.submitEl = document.getElementById("add-btn");
+
+    this.submitEl.addEventListener("click", function(evt) {
+      var details = {
+        domain: self.urlEl.value, 
+        username: self.usernameEl.value, 
+        password: self.passwordEl.value
+      };
+      background.addLoginDetails(details, function() {
+        View.switchView("browse");
+      });
+    });
   }
   CreateView.prototype = new View();
+
+  CreateView.prototype.render = function(domainInfo) {
+    this.urlEl.value = domainInfo.domain;
+    if (domainInfo.submitted) {
+      this.passwordEl.value = domainInfo.submitted.password;
+      this.usernameEl.value = domainInfo.submitted.username;
+    }
+  };
   return CreateView;
 })();
 
@@ -104,7 +121,7 @@ var BrowseView = (function() {
     this.searchEl.addEventListener('keyup', function(e) {
       var term = e.target.value;
       if (term.length > 1) {
-        self.renderResults(background.searchTree(term));
+        self.render(background.searchTree(term));
       }
     }, true);
 
@@ -120,6 +137,11 @@ var BrowseView = (function() {
   }
 
   BrowseView.prototype = new View();
+
+  BrowseView.reload = function(results) {
+    var browseView = View.views["browse"];
+    browseView.render(results);
+  };
 
   BrowseView.prototype.renderResult = function(result) {
     var el = document.createElement("li");
@@ -137,7 +159,7 @@ var BrowseView = (function() {
     return el;
   }
 
-  BrowseView.prototype.renderResults = function(results) {
+  BrowseView.prototype.render = function(results) {
     var self = this;
     this.resultsEl.innerHTML = "";
     results.forEach(function(result) {
@@ -152,19 +174,16 @@ View.register("create", new CreateView());
 View.register("generate", new GenerateView());
 
 chrome.tabs.getSelected(null, function(tab) {
-  var currentDomain = background.getDomainInfo(tab.url);
+  var domainInfo = background.getDomainInfo(tab.url);
 
   View.switchView("browse");
-  if (currentDomain.matches.length) {
-    View.get("browse").renderResults(currentDomain.matches);
+  if (domainInfo.matches.length) {
+    View.get("browse").render(domainInfo.matches);
   }
 
-  if (currentDomain.submitted) {
-    var submitted = currentDomain.submitted;
-    urlEl.value = currentDomain.domain;
-    usernameEl.value = submitted.username;
-    passwordEl.value = submitted.password;
+  if (domainInfo.submitted) {
     View.switchView("create");
+    View.get("create").render(domainInfo);
   }
 });
 

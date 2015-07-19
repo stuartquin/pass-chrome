@@ -64,16 +64,18 @@ var generatePassword = function(callback) {
   sendNativeMessage("generate", {}, callback);
 }
 
-var addLoginDetails = function(message) {
-  var details = {domain:domain, username:username, password:password};
+var addLoginDetails = function(message, callback) {
   sendNativeMessage("add", message, function(response) {
-    console.log(response);
+    loadTree(callback);
   });
 };
 
-var loadTree = function() {
+var loadTree = function(callback) {
   sendNativeMessage("tree", {}, function(response) {
     passTree = response;
+    if (callback) {
+      callback(passTree);
+    }
   });
 }
 
