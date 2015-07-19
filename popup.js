@@ -75,7 +75,12 @@ var CreateView = (function() {
         password: self.passwordEl.value
       };
       background.addLoginDetails(details, function() {
-        View.switchView("browse");
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+          var tab = tabs[0];
+          if (tab) {
+            updateActiveDomain(tab);
+          }
+        });
       });
     });
   }
@@ -173,17 +178,18 @@ View.register("browse", new BrowseView());
 View.register("create", new CreateView());
 View.register("generate", new GenerateView());
 
-chrome.tabs.getSelected(null, function(tab) {
+var updateActiveDomain = function(tab) {
   var domainInfo = background.getDomainInfo(tab.url);
 
   View.switchView("browse");
   if (domainInfo.matches.length) {
     View.get("browse").render(domainInfo.matches);
+  } else {
+    if (domainInfo.submitted) {
+      View.switchView("create");
+      View.get("create").render(domainInfo);
+    }
   }
+};
 
-  if (domainInfo.submitted) {
-    View.switchView("create");
-    View.get("create").render(domainInfo);
-  }
-});
-
+chrome.tabs.getSelected(null, updateActiveDomain);
