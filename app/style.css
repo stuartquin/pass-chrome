@@ -6,6 +6,7 @@
 
 input {
   width: 100%;
+  height: 25px;
 }
 
 .nav-bar {
@@ -46,4 +47,13 @@ li {
 
 .detected-result {
   background-color: #D4EE9F;
+}
+
+.create-password input {
+  width: 80%;
+}
+.create-password button {
+  width: 18%;
+  height: 22px;
+  margin: 0;
 }

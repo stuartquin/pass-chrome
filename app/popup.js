@@ -73,6 +73,15 @@ var CreateView = (function() {
     this.usernameEl = document.getElementById("add-username");
     this.passwordEl = document.getElementById("add-password");
     this.submitEl = document.getElementById("add-btn");
+    this.generateEl = document.getElementById("add-generate");
+
+    this.generateEl.addEventListener("click", function(evt) {
+      background.generatePassword(function(result){
+        if (result && result.generated) {
+          self.passwordEl.value = result.generated; 
+        }
+      });
+    });
 
     this.submitEl.addEventListener("click", function(evt) {
       var details = {
@@ -202,9 +211,9 @@ var updateActiveDomain = function(tab) {
   } else {
     if (domainInfo.submitted) {
       View.switchView("create");
-      View.get("create").render();
     }
   }
+  //View.switchView("create");
 };
 
 chrome.tabs.getSelected(null, updateActiveDomain);
