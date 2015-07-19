@@ -72,7 +72,7 @@ var addLoginDetails = function(message, callback) {
 
 var loadTree = function(callback) {
   sendNativeMessage("tree", {}, function(response) {
-    passTree = response;
+    passTree = response || {};
     if (callback) {
       callback(passTree);
     }

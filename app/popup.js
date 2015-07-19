@@ -39,7 +39,9 @@ var View = (function() {
   View.navActions = {
     "generate": View.switchView,
     "create": View.switchView,
-    "reload": background.loadTree,
+    "reload": function() {
+      background.loadTree()
+    },
     "back": function() {
       if (View.viewStack.length > 1) {
         View.viewStack.pop().hide();
@@ -90,8 +92,11 @@ var CreateView = (function() {
   }
   CreateView.prototype = new View();
 
-  CreateView.prototype.render = function(domainInfo) {
-    var domainInfo = background.getCurrentDomainInfo();
+  CreateView.prototype.render = function(result) {
+    var domainInfo = result;
+    if (!domainInfo) {
+      domainInfo = background.getCurrentDomainInfo();
+    }
     this.urlEl.value = domainInfo.domain;
     if (domainInfo.submitted) {
       this.passwordEl.value = domainInfo.submitted.password;
@@ -169,12 +174,15 @@ var BrowseView = (function() {
     return el;
   }
 
-  BrowseView.prototype.render = function() {
+  BrowseView.prototype.render = function(results) {
     var self = this;
-    var domainInfo = background.getCurrentDomainInfo();
+    var matches = results;
+    if (!matches) {
+      matches = background.getCurrentDomainInfo().matches; 
+    }
 
     this.resultsEl.innerHTML = "";
-    domainInfo.matches.forEach(function(result) {
+    matches.forEach(function(result) {
       self.resultsEl.appendChild(self.renderResult(result));
     });
   };
@@ -190,7 +198,7 @@ var updateActiveDomain = function(tab) {
 
   View.switchView("browse");
   if (domainInfo.matches) {
-    View.get("browse").render();
+    View.get("browse").render(domainInfo.matches);
   } else {
     if (domainInfo.submitted) {
       View.switchView("create");
