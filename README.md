@@ -15,6 +15,16 @@ communication
 ## Installation (Development mode)
 
 * Checkout or download and extract this project
-* In Chrome go to settings, dev
+* In Chrome/Chromium go to More Tools > Extensions
+* Drag and drop `app.crx` onto the page
+* Finally, to enable the native client support run
+ 
+```
+./install.sh
+```
 
+or for Chromium
 
+```
+./install.sh chromium
+```

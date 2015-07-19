@@ -1,5 +1,6 @@
 {
   "manifest_version": 2,
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0meUThm41kMpWHVmTnwt6A0BulOEYVKsQtg9iwAn2vwSwwfNJjIRHxwhUKUCSphkmsGx3wPls53Kh7R+2zN9D5WIpI2m4arxjbS7jFrqxVZGoC7WssfCkN2cehNysIy2WBhF20CyEUWLKG7gFG3VsjK/8LV6ZMkY37d9FqaSvVPzBcfF3Cv5Blc5Q8wymxj4ZacmjYpLIdVvp3vlI6t5ObjIdCrn9xeVNgeczrkiLlrng0vB6JhwvsMdmNrmy5W9eoimXI+5rfwRK4ZIWpAhn9PlPhJpZ0JAfTrWwdmwV7aKSsXuVA5uwLebavzXzP3zxWl1ERNVQCQ36ALOm9yO6QIDAQAB",
 
   "name": "Pass for Chrome",
   "description": "This extension allows usage of pass in chrome",
