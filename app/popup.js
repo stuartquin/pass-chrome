@@ -157,7 +157,7 @@ var BrowseView = (function() {
           background.lookupAndFill(target.dataset.domain);
         }
         if (action === "edit") {
-          View.switchView("create");
+          editExistingDomain(target.dataset.domain);
         }
       }
     }, true);
@@ -207,6 +207,19 @@ var BrowseView = (function() {
 View.register("browse", new BrowseView());
 View.register("create", new CreateView());
 View.register("generate", new GenerateView());
+
+var editExistingDomain = function(domain) {
+  background.lookupPassword(domain, function(result) {
+    if (result) {
+      var domainInfo = {
+        domain: domain,
+        submitted: result
+      }
+      View.switchView("create");
+      View.get("create").render(domainInfo);
+    }
+  });
+}
 
 var updateActiveDomain = function(tab) {
   var domainInfo = background.getDomainInfo(tab.url);
