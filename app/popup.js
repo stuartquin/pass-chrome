@@ -61,6 +61,26 @@ var View = (function() {
     this.render();
   };
 
+  View.prototype.togglePasswordView = function() {
+    var self = this;
+    var viewEl = this.el.querySelector(".view-password");
+    if (viewEl) {
+      viewEl.addEventListener("click", function(evt) {
+        evt.stopPropagation();
+        if (self.passwordEl.type === "password") {
+          self.passwordEl.type = "text";
+          evt.target.classList.remove("fa-eye");
+          evt.target.classList.add("fa-eye-slash");
+        } else {
+          self.passwordEl.type = "password";
+          evt.target.classList.add("fa-eye");
+          evt.target.classList.remove("fa-eye-slash");
+        }
+        return false;
+      });
+    }
+  }
+
   return View;
 })();
 
@@ -98,6 +118,8 @@ var CreateView = (function() {
         });
       });
     });
+
+    this.togglePasswordView();
   }
   CreateView.prototype = new View();
 
@@ -129,6 +151,7 @@ var GenerateView = (function() {
         }
       });
     });
+    this.togglePasswordView();
   }
   GenerateView.prototype = new View();
   return GenerateView;

@@ -5,7 +5,7 @@
 }
 
 input {
-  width: 100%;
+  width: 98%;
   height: 25px;
 }
 
@@ -62,7 +62,12 @@ li {
   float: right;
   display: none;
 }
-
-li:hover a {
+li:hover .view-domain {
   display: block;
 }
+
+.view-password {
+  margin-left: -20px;
+  width: 18px;
+}
+
