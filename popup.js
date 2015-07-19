@@ -32,20 +32,6 @@ navBackEl.addEventListener("click", function(evt) {
   }
 });
 
-chrome.tabs.getSelected(null, function(tab) {
-  var sites = background.getSiteInfo(tab.url);
-
-  if (sites.matches.length) {
-    views["browse"].renderResults(sites.matches);
-  }
-
-  if (sites.submitted) {
-    urlEl.value = sites.domain;
-    usernameEl.value = sites.submitted.username;
-    passwordEl.value = sites.submitted.password;
-  }
-});
-
 var View = (function() {
   function View() {
   }
@@ -117,7 +103,7 @@ var BrowseView = (function() {
 
   BrowseView.prototype.renderResult = function(result) {
     var el = document.createElement("li");
-    if (result === background.getCurrentSiteInfo().domain) {
+    if (result === background.getCurrentDomainInfo().domain) {
       el.classList.add("detected-result");
     }
     el.dataset.action = "fill";
@@ -156,4 +142,21 @@ var views = {
 }
 
 var viewStack = [];
-switchView("browse");
+
+chrome.tabs.getSelected(null, function(tab) {
+  var currentDomain = background.getDomainInfo(tab.url);
+
+  switchView("browse");
+  if (currentDomain.matches.length) {
+    views["browse"].renderResults(currentDomain.matches);
+  }
+
+  if (currentDomain.submitted) {
+    var submitted = currentDomain.submitted;
+    urlEl.value = currentDomain.domain;
+    usernameEl.value = submitted.username;
+    passwordEl.value = submitted.password;
+    switchView("create");
+  }
+});
+

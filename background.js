@@ -8,7 +8,7 @@ var passwordFormFields = ["password", "pass", "pw"];
 var usernameFormFields = ["username", "email", "login", "id", "acct", "user", "name"];
 var submittedFields = {};
 
-var currentSiteInfo = {};
+var currentDomainInfo = {};
 
 var setSuccessBadge = function(tabId) {
   chrome.browserAction.setBadgeText({text: " ", tabId: tabId});
@@ -20,21 +20,16 @@ var setAlertBadge = function(tabId) {
   chrome.browserAction.setBadgeBackgroundColor({color: "#FFA633", tabId: tabId});
 };
 
-var getSubmittedDetails = function(url) {
-  var domain = getDomain(url);
-  return submittedFields[domain];
-}
-
-var getCurrentSiteInfo = function() {
-  return currentSiteInfo;
+var getCurrentDomainInfo = function() {
+  return currentDomainInfo;
 };
 
-var getSiteInfo = function(url) {
+var getDomainInfo = function(url) {
   var domain = getDomain(url);
   return {
     domain: domain,
     matches: (passTree[domain] ? [passTree[domain]] : []),
-    submitted: submittedFields[domain] || {}
+    submitted: submittedFields[domain] || null
   };
 }
 
@@ -44,6 +39,9 @@ var getDomain = function(url) {
   return parser.hostname.replace(regex, "");
 }
 
+/**
+ * Sends login details to the content script
+ */
 var sendLoginDetails = function(message) {
   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
     chrome.tabs.sendMessage(tabs[0].id, message, function(response) {});
@@ -115,8 +113,6 @@ var getLoginFields = function(request) {
       var passwordField = getKnownField(body.formData, passwordFormFields);
 
       if (passwordField) {
-        setAlertBadge(request.tabId);
-
         return {
           username: body.formData[usernameField],
           password: body.formData[passwordField]
@@ -134,10 +130,15 @@ chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
   authAttempts = 0;
 
   if (change.status == "complete") {
-    currentSiteInfo = getSiteInfo(tab.url);
-    lookupAndFill(currentSiteInfo.domain);
-    if (passTree[currentSiteInfo.domain]) {
+    currentDomainInfo = getDomainInfo(tab.url);
+    lookupAndFill(currentDomainInfo.domain);
+
+    if (currentDomainInfo.matches.length) {
       setSuccessBadge(tab.id);
+    } else {
+      if (currentDomainInfo.submitted) {
+        setAlertBadge(tab.id);
+      }
     }
   } else {
     if (Object.keys(passTree).length === 0) {
