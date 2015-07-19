@@ -9,6 +9,13 @@ var usernameFormFields = ["username", "email", "login", "id", "acct", "user", "n
 var submittedFields = {};
 
 var currentDomainInfo = {};
+var generateOptions = {
+  length: 12,
+};
+
+var setGenerateOptions = function(options) {
+  generateOptions = options;
+};
 
 var setSuccessBadge = function(tabId) {
   chrome.browserAction.setBadgeText({text: " ", tabId: tabId});
@@ -60,8 +67,8 @@ var sendNativeMessage = function(action, message, callback) {
                                    callback);
 };
 
-var generatePassword = function(message, callback) {
-  sendNativeMessage("generate", message, callback);
+var generatePassword = function(callback) {
+  sendNativeMessage("generate", generateOptions, callback);
 }
 
 var addLoginDetails = function(message, callback) {

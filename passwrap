@@ -76,8 +76,26 @@ def reply(message):
         sys.exit(1)
 
 def pass_generate(options):
+    cmd = ["pwgen", "-1"]
+
+    if "length" in options:
+        cmd.extend(["-n", str(options["length"])])
+
+    if "capitalize" in options and options["capitalize"]:
+        cmd.extend(["-c"])
+    else:
+        cmd.extend(["-A"])
+
+    if "numeric" in options and options["numeric"]:
+        cmd.extend(["-n"])
+    else:
+        cmd.extend(["-0"])
+
+    if "symbol" in options and options["symbol"]:
+        cmd.extend(["-y"])
+
     try:
-        out = subprocess.check_output(["pwgen", "-1", "-n", str(options["length"])])
+        out = subprocess.check_output(cmd)
         result = out.strip()
         return json.dumps({"generated":result})
     except subprocess.CalledProcessError:

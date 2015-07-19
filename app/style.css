@@ -4,9 +4,13 @@
   width: 200px;
 }
 
-input {
+input[type="text"],input[type="password"] { 
   width: 98%;
   height: 25px;
+}
+
+label {
+  display:inline-block;
 }
 
 .nav-bar {

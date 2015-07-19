@@ -144,6 +144,11 @@ var GenerateView = (function() {
     this.btnEl = document.getElementById("generate-btn");
     this.passwordEl = document.getElementById("generated-password");
     this.lengthEl = document.getElementById("generated-length");
+    this.booleanEls = {
+      "capitalize": document.getElementById("generated-capitalize"),
+      "numeric": document.getElementById("generated-numeric"),
+      "symbol": document.getElementById("generated-symbol")
+    }
 
     for (var i = 3; i < 100; i++) {
       var opt = document.createElement("option");
@@ -156,10 +161,8 @@ var GenerateView = (function() {
     }
 
     this.btnEl.addEventListener('click', function(e) {
-      options = {
-        length: self.lengthEl.value,
-      };
-      background.generatePassword(options, function(result){
+      background.setGenerateOptions(self.getOptions());
+      background.generatePassword(function(result){
         if (result && result.generated) {
           self.passwordEl.value = result.generated; 
         }
@@ -168,6 +171,15 @@ var GenerateView = (function() {
     this.togglePasswordView();
   }
   GenerateView.prototype = new View();
+
+  GenerateView.prototype.getOptions = function() {
+    var options = {length: this.lengthEl.value};
+    for (var i in this.booleanEls) {
+      options[i] = this.booleanEls[i].checked
+    }
+    return options;
+  };
+
   return GenerateView;
 })();
 
