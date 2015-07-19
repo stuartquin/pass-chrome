@@ -88,8 +88,11 @@ def pass_add(details):
     username = details["username"]
     password = details["password"]
     try:
-        p1 = Popen(["pass", "insert", "-m", domain], stdin=PIPE)
-        p1.communicate("%s\n---\nusername: %s" % (password, username))
+        p1 = Popen(["pass", "rm", domain], stdin=PIPE)
+        p1.communicate("Y\n")
+
+        p2 = Popen(["pass", "insert", "-m", domain], stdin=PIPE)
+        p2.communicate("%s\n---\nusername: %s" % (password, username))
         return json.dumps({"username": username, "password": password})
     except subprocess.CalledProcessError:
         return '{"ERROR": "' + domain + '"}'
