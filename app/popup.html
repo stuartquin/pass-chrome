@@ -2,6 +2,7 @@
 <head>
 
 <link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="font-awesome-4.3.0/css/font-awesome.min.css" />
 
 </head>
 <body>
@@ -16,8 +17,18 @@
       </div>
     </div>
     <div class="nav-bar">
-      <a href="#" class="nav" data-action="reload">reload</a>
-      <a href="#" class="nav" data-action="generate">generate password</a>
+      <button class="nav fa fa-repeat"
+              title="reload pass tree"
+              data-action="reload">
+      </button>
+      <button class="nav fa fa-lock"
+              title="Generate secure password"
+              data-action="generate">
+      </button>
+      <button class="nav fa fa-plus"
+              title="Add new"
+              data-action="create">
+      </button>
     </div>
   </div>
 
@@ -27,7 +38,10 @@
       <button id="generate-btn">Generate</button>
     </div>
     <div class="nav-bar">
-      <a href="#" class="nav" data-action="back">&lt;Back</a>
+      <button class="nav fa fa-chevron-left"
+              title="Back"
+              data-action="back">
+      </button>
     </div>
   </div>
   
@@ -47,7 +61,10 @@
       </div>
     </div>
     <div class="nav">
-      <a href="#" class="nav" data-action="back">&lt;Back</a>
+      <button class="nav fa fa-chevron-left"
+              title="Back"
+              data-action="back">
+      </button>
     </div>
   </div>
 </div>

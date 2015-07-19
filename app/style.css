@@ -11,10 +11,14 @@ input {
 .nav-bar {
  margin-top: 10px;
  margin-bottom: 10px;
+
+ width: 100%;
 }
 
-.sub-nav {
+.nav-bar button {
   height: 25px;
+  width: 25px;
+  padding: 5px;
 }
 
 .content {

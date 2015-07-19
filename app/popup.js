@@ -38,6 +38,7 @@ var View = (function() {
 
   View.navActions = {
     "generate": View.switchView,
+    "create": View.switchView,
     "reload": background.loadTree,
     "back": function() {
       if (View.viewStack.length > 1) {
@@ -51,8 +52,11 @@ var View = (function() {
     this.el.style.display = "none";
   };
 
+  View.prototype.render = function() {};
+
   View.prototype.show = function() {
     this.el.style.display = "block";
+    this.render();
   };
 
   return View;
@@ -87,6 +91,7 @@ var CreateView = (function() {
   CreateView.prototype = new View();
 
   CreateView.prototype.render = function(domainInfo) {
+    var domainInfo = background.getCurrentDomainInfo();
     this.urlEl.value = domainInfo.domain;
     if (domainInfo.submitted) {
       this.passwordEl.value = domainInfo.submitted.password;
@@ -143,9 +148,9 @@ var BrowseView = (function() {
 
   BrowseView.prototype = new View();
 
-  BrowseView.reload = function(results) {
+  BrowseView.reload = function() {
     var browseView = View.views["browse"];
-    browseView.render(results);
+    browseView.render();
   };
 
   BrowseView.prototype.renderResult = function(result) {
@@ -164,10 +169,12 @@ var BrowseView = (function() {
     return el;
   }
 
-  BrowseView.prototype.render = function(results) {
+  BrowseView.prototype.render = function() {
     var self = this;
+    var domainInfo = background.getCurrentDomainInfo();
+
     this.resultsEl.innerHTML = "";
-    results.forEach(function(result) {
+    domainInfo.matches.forEach(function(result) {
       self.resultsEl.appendChild(self.renderResult(result));
     });
   };
@@ -182,12 +189,12 @@ var updateActiveDomain = function(tab) {
   var domainInfo = background.getDomainInfo(tab.url);
 
   View.switchView("browse");
-  if (domainInfo.matches.length) {
-    View.get("browse").render(domainInfo.matches);
+  if (domainInfo.matches) {
+    View.get("browse").render();
   } else {
     if (domainInfo.submitted) {
       View.switchView("create");
-      View.get("create").render(domainInfo);
+      View.get("create").render();
     }
   }
 };
