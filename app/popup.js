@@ -143,9 +143,23 @@ var GenerateView = (function() {
     this.el = document.getElementById("generate");
     this.btnEl = document.getElementById("generate-btn");
     this.passwordEl = document.getElementById("generated-password");
+    this.lengthEl = document.getElementById("generated-length");
+
+    for (var i = 3; i < 100; i++) {
+      var opt = document.createElement("option");
+      opt.value = i;
+      opt.innerText = i;
+      if (i == 12) {
+        opt.selected = true;
+      }
+      this.lengthEl.appendChild(opt);
+    }
 
     this.btnEl.addEventListener('click', function(e) {
-      background.generatePassword(function(result){
+      options = {
+        length: self.lengthEl.value,
+      };
+      background.generatePassword(options, function(result){
         if (result && result.generated) {
           self.passwordEl.value = result.generated; 
         }
@@ -248,7 +262,7 @@ var updateActiveDomain = function(tab) {
   var domainInfo = background.getDomainInfo(tab.url);
 
   View.switchView("browse");
-  if (domainInfo.matches) {
+  if (domainInfo.matches.length) {
     View.get("browse").render(domainInfo.matches);
   } else {
     if (domainInfo.submitted) {

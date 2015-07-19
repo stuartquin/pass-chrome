@@ -34,9 +34,19 @@
 
   <div id="generate" class="view">
     <div class="content">
-      <input type="text" placeholder="Password" id="generated-password"/>
+      <p>
+      <input type="text" placeholder="password" id="generated-password"/>
       <a class="fa fa-eye-slash view-password"></a>
+      </p>
+      <p>
+      <label for="generated-len">Length:</label>
+      <select id="generated-length" name="generate-len">
+        <option value="2">2</option>
+      </select>
+      </p>
+      <p>
       <button id="generate-btn">Generate</button>
+      </p>
     </div>
     <div class="nav-bar">
       <button class="nav fa fa-chevron-left"

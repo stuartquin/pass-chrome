@@ -16,7 +16,7 @@ var setSuccessBadge = function(tabId) {
 };
 
 var setAlertBadge = function(tabId) {
-  chrome.browserAction.setBadgeText({text: "!", tabId: tabId});
+  chrome.browserAction.setBadgeText({text: " ", tabId: tabId});
   chrome.browserAction.setBadgeBackgroundColor({color: "#FFA633", tabId: tabId});
 };
 
@@ -60,8 +60,8 @@ var sendNativeMessage = function(action, message, callback) {
                                    callback);
 };
 
-var generatePassword = function(callback) {
-  sendNativeMessage("generate", {}, callback);
+var generatePassword = function(message, callback) {
+  sendNativeMessage("generate", message, callback);
 }
 
 var addLoginDetails = function(message, callback) {

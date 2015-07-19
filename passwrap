@@ -77,7 +77,7 @@ def reply(message):
 
 def pass_generate(options):
     try:
-        out = subprocess.check_output(["pwgen", "-1", "-n", "18"])
+        out = subprocess.check_output(["pwgen", "-1", "-n", str(options["length"])])
         result = out.strip()
         return json.dumps({"generated":result})
     except subprocess.CalledProcessError:
