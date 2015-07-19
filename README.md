@@ -7,6 +7,14 @@ instructions and maybe even a Chrome Store entry soon.
 
 ![Screen Shot](/screenshot.jpg?raw=true "Pass Chrome")
 
+## Features
+
+* Search and insert passwords
+* Autofill for recognised sites (Green icon)
+* Detect new details submitted (Orange icon)
+* Add/Edit entries
+* Password generator
+
 ## Requirements
 
 * Pass is installed and initialized, available to system as `pass` command
