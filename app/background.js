@@ -35,7 +35,7 @@ var getDomainInfo = function(url) {
   var domain = getDomain(url);
   return {
     domain: domain,
-    matches: (passTree[domain] ? [passTree[domain]] : []),
+    matches: searchTree(domain),
     submitted: submittedFields[domain] || null
   };
 }
@@ -100,10 +100,13 @@ var lookupPassword = function(domain, callback) {
  * Prefix search over tree
  */
 var searchTree = function(term) {
-  var keys = Object.keys(passTree);
-  return keys.filter(function(key) {
+  var keys = Object.keys(passTree).filter(function(key) {
     return key.toLowerCase().indexOf(term.toLowerCase()) > -1;
-  }); 
+  });
+  keys.sort(function(a,b) {
+    return a.length > b.length;
+  });
+  return keys;
 }
 
 var getKnownField = function(fields, knownFields) {

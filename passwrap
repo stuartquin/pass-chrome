@@ -170,7 +170,7 @@ def parse_tree():
             parents.append(domain)
 
         if len(parents):
-            domains[domain] = "/".join(parents[1:])
+            domains["/".join(parents[1:])] = "/".join(parents[1:])
         prev_level = level
 
     return domains

@@ -212,6 +212,11 @@ var BrowseView = (function() {
     this.resultsEl.addEventListener('click', function(e) {
       var target = e.target;
       var action = target.dataset.action;
+      while (!action || !target.tagName === "LI") {
+        target = target.parentElement; 
+        action = target.dataset.action;
+      }      
+
       if (action) {
         if (action === "fill") {
           background.lookupAndFill(target.dataset.domain);
@@ -237,7 +242,8 @@ var BrowseView = (function() {
     }
     el.dataset.action = "fill";
     el.dataset.domain = result;
-    el.innerHTML = result;
+    el.title = result;
+    el.innerHTML = "<span class='result'>" + result + "</span>";
 
     var viewBtn = document.createElement("a");
     viewBtn.dataset.action = "edit";
