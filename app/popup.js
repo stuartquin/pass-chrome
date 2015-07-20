@@ -162,15 +162,26 @@ var GenerateView = (function() {
 
     this.btnEl.addEventListener('click', function(e) {
       background.setGenerateOptions(self.getOptions());
-      background.generatePassword(function(result){
-        if (result && result.generated) {
-          self.passwordEl.value = result.generated; 
-        }
-      });
+      self.generatePassword();
     });
     this.togglePasswordView();
   }
   GenerateView.prototype = new View();
+  
+  GenerateView.prototype.generatePassword = function() {
+    var self = this;
+    background.generatePassword(function(result){
+      if (result && result.generated) {
+        self.passwordEl.value = result.generated; 
+        self.passwordEl.focus();
+        self.passwordEl.select();
+      }
+    });
+  };
+
+  GenerateView.prototype.render = function(results) {
+    this.generatePassword();
+  };
 
   GenerateView.prototype.getOptions = function() {
     var options = {length: this.lengthEl.value};
