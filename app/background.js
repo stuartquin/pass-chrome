@@ -128,13 +128,17 @@ var getLoginFields = function(request) {
 
       if (passwordField) {
         return {
-          username: body.formData[usernameField],
-          password: body.formData[passwordField]
+          username: body.formData[usernameField][0],
+          password: body.formData[passwordField][0]
         };
       }
     }
   }
 };
+
+var isNewInfo = function(results, submitted) {
+  return results.username !== submitted.username || results.password !== submitted.password;
+}
 
 /**
  * Called on each tab change
@@ -145,15 +149,18 @@ chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
 
   if (change.status == "complete") {
     currentDomainInfo = getDomainInfo(tab.url);
-    lookupAndFill(currentDomainInfo.domain);
+    var domain = getDomain(tab.url);
 
-    if (currentDomainInfo.matches.length) {
-      setSuccessBadge(tab.id);
-    } else {
-      if (currentDomainInfo.submitted) {
-        setAlertBadge(tab.id);
+    lookupPassword(domain, function(results) {
+      if (results) {
+        setSuccessBadge(tab.id);
       }
-    }
+      if (currentDomainInfo.submitted) {
+        if (!results || isNewInfo(results, currentDomainInfo.submitted)) {
+          setAlertBadge(tab.id);
+        }
+      }
+    });
   } else {
     if (Object.keys(passTree).length === 0) {
       loadTree();

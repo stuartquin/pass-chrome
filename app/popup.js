@@ -296,7 +296,6 @@ var updateActiveDomain = function(tab) {
   if (domainInfo.submitted) {
     View.switchView("create");
   }
-  //View.switchView("create");
 };
 
 chrome.tabs.getSelected(null, updateActiveDomain);
