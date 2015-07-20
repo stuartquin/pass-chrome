@@ -205,7 +205,7 @@ var BrowseView = (function() {
     this.searchEl.addEventListener('keyup', function(e) {
       var term = e.target.value;
       if (term.length > 1) {
-        self.render(background.searchTree(term));
+        self.render(term);
       }
     }, true);
 
@@ -255,17 +255,17 @@ var BrowseView = (function() {
     return el;
   }
 
-  BrowseView.prototype.render = function(results) {
-    var self = this;
-    var matches = results;
-    if (!matches) {
-      matches = background.getCurrentDomainInfo().matches; 
-    }
+  BrowseView.prototype.render = function(term) {
+    if (term) {
+      var self = this;
+      var results = background.searchTree(term);
+      this.searchEl.value = term;
+      this.resultsEl.innerHTML = "";
 
-    this.resultsEl.innerHTML = "";
-    matches.forEach(function(result) {
-      self.resultsEl.appendChild(self.renderResult(result));
-    });
+      results.forEach(function(result) {
+        self.resultsEl.appendChild(self.renderResult(result));
+      });
+    }
   };
   return BrowseView;
 })();
@@ -291,12 +291,10 @@ var updateActiveDomain = function(tab) {
   var domainInfo = background.getDomainInfo(tab.url);
 
   View.switchView("browse");
-  if (domainInfo.matches.length) {
-    View.get("browse").render(domainInfo.matches);
-  } else {
-    if (domainInfo.submitted) {
-      View.switchView("create");
-    }
+  View.get("browse").render(domainInfo.domain);
+
+  if (domainInfo.submitted) {
+    View.switchView("create");
   }
   //View.switchView("create");
 };
