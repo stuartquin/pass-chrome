@@ -160,6 +160,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
           setAlertBadge(tab.id);
         }
       }
+      sendLoginDetails(results);
     });
   } else {
     if (Object.keys(passTree).length === 0) {
@@ -190,8 +191,8 @@ chrome.webRequest.onBeforeRequest.addListener(
 chrome.webRequest.onAuthRequired.addListener(
   function(details, callbackFn) {
     console.log("onAuthRequired!", details, callbackFn);
-    if (authAttempts > 0) {
-      return callbackFn({cancel: true});
+    if (authAttempts > 2) {
+      return callbackFn();
     }
     authAttempts++;
 
@@ -199,7 +200,7 @@ chrome.webRequest.onAuthRequired.addListener(
       if (result) {
         callbackFn({authCredentials: result});
       } else {
-        callbackFn({cancel: true});
+        callbackFn();
       }
     });
   },
