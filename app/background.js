@@ -173,31 +173,29 @@ chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
  * Called when request made, if POST, check for known password/username
  * fields
  */
-chrome.webRequest.onBeforeRequest.addListener(
-  function(request) {
-    var domain = getDomain(request.url);
-    var fields = getLoginFields(request);
-    if (fields) {
-      submittedFields[domain] = fields;
-    }
-    return {cancel: false};
-  },
-  {urls: ["<all_urls>"]},
-["requestBody"]);
+// chrome.webRequest.onBeforeRequest.addListener(
+//   function(request) {
+//     var domain = getDomain(request.url);
+//     var fields = getLoginFields(request);
+//     return {cancel: false};
+//   },
+//   {urls: ["<all_urls>"]},
+// ["requestBody"]);
 
 /**
  * Handle Basic Auth Dialogs
  */
 chrome.webRequest.onAuthRequired.addListener(
   function(details, callbackFn) {
-    console.log("onAuthRequired!", details, callbackFn);
     if (authAttempts > 2) {
       return callbackFn();
     }
     authAttempts++;
 
-    lookupPassword(getDomain(details.url), function(result) {
+    var domain = getDomain(details.url);
+    lookupPassword(domain, function(result) {
       if (result) {
+        submittedFields[domain] = result;
         callbackFn({authCredentials: result});
       } else {
         callbackFn();
