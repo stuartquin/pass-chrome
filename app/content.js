@@ -38,7 +38,7 @@ var fillFields = function(request) {
     passwordEl.value = request.password;
     usernameEl = getBestUsernameField(inputs, passwordEl);
 
-    if (usernameEl) {
+    if (usernameEl && !usernameEl.readOnly && request.username) {
       usernameEl.value = request.username;
     }
     return true;
