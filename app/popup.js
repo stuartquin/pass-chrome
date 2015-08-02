@@ -213,9 +213,9 @@ var BrowseView = (function() {
       var target = e.target;
       var action = target.dataset.action;
       while (!action || !target.tagName === "LI") {
-        target = target.parentElement; 
+        target = target.parentElement;
         action = target.dataset.action;
-      }      
+      }
 
       if (action) {
         if (action === "fill") {
@@ -259,7 +259,6 @@ var BrowseView = (function() {
     if (term) {
       var self = this;
       var results = background.searchTree(term);
-      this.searchEl.value = term;
       this.resultsEl.innerHTML = "";
 
       results.forEach(function(result) {
