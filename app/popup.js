@@ -1,5 +1,10 @@
 var background = chrome.extension.getBackgroundPage();
 
+document.addEventListener('copy', function(e) {
+  var content = document.getElementById("add-password").value
+  e.clipboardData.setData('text/plain', content);
+  e.preventDefault();
+});
 
 var View = (function() {
   function View() {
@@ -93,6 +98,7 @@ var CreateView = (function() {
     this.usernameEl = document.getElementById("add-username");
     this.passwordEl = document.getElementById("add-password");
     this.submitEl = document.getElementById("add-btn");
+    this.copyEl = document.getElementById("add-copy");
     this.generateEl = document.getElementById("add-generate");
 
     this.generateEl.addEventListener("click", function(evt) {
@@ -101,6 +107,10 @@ var CreateView = (function() {
           self.passwordEl.value = result.generated; 
         }
       });
+    });
+
+    this.copyEl.addEventListener("click", function(evt) {
+      document.execCommand("copy");
     });
 
     this.submitEl.addEventListener("click", function(evt) {
@@ -123,6 +133,16 @@ var CreateView = (function() {
   }
   CreateView.prototype = new View();
 
+  CreateView.prototype.toggleMode = function(mode) {
+    if (mode === "edit") {
+      this.copyEl.classList.remove("hidden");
+      this.generateEl.classList.add("hidden");
+    } else {
+      this.copyEl.classList.add("hidden");
+      this.generateEl.classList.remove("hidden");
+    }
+  }
+
   CreateView.prototype.render = function(result) {
     var domainInfo = result;
     if (!domainInfo) {
@@ -132,6 +152,12 @@ var CreateView = (function() {
     if (domainInfo.submitted) {
       this.passwordEl.value = domainInfo.submitted.password;
       this.usernameEl.value = domainInfo.submitted.username;
+    }
+
+    if (this.passwordEl.value) {
+      this.toggleMode("edit");
+    } else {
+      this.toggleMode("create");
     }
   };
   return CreateView;

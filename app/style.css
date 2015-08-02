@@ -83,3 +83,6 @@ li:hover .result + .view-domain {
   width: 18px;
 }
 
+.hidden {
+  display: none;
+}

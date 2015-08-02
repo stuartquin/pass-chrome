@@ -31,6 +31,7 @@
     "nativeMessaging",
     "tabs",
     "webRequest",
-    "webRequestBlocking"
+    "webRequestBlocking",
+    "clipboardWrite"
   ]
 }
