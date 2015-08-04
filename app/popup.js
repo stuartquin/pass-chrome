@@ -229,16 +229,19 @@ var BrowseView = (function() {
     this.searchEl = document.getElementById("search");
 
     this.searchEl.addEventListener('keyup', function(e) {
+      // Down Key
       if (e.keyCode === 40) {
         self.resultsEl.focus();
         self.resultsEl.selectedIndex = 0;
+        background.lookupAndFill(self.resultsEl.selectedOptions[0].value);
+        return;
       }
 
       var term = e.target.value;
       if (term.length > 1) {
         self.render(term);
       }
-    }, true);
+    });
 
     this.resultsEl.addEventListener('dblclick', function(e){
       var target = BrowseView.getActionTarget(e);
@@ -250,7 +253,10 @@ var BrowseView = (function() {
         editExistingDomain(target.dataset.domain);
       }
     }, true);
-    this.resultsEl.addEventListener('change', BrowseView.changeResult, true);
+    this.resultsEl.addEventListener('change', function(e){
+      var target = BrowseView.getActionTarget(e);
+      background.lookupAndFill(target.dataset.domain);
+    }, true);
   }
 
   BrowseView.prototype = new View();
@@ -266,16 +272,6 @@ var BrowseView = (function() {
       target = target.selectedOptions[0];
     }
     return target;
-  };
-
-  BrowseView.changeResult = function(e) {
-    var target = BrowseView.getActionTarget(e);
-    var action = target.dataset.action;
-    if (action) {
-      if (action === "fill") {
-        background.lookupAndFill(target.dataset.domain);
-      }
-    }
   };
 
   BrowseView.prototype.renderResult = function(result) {
