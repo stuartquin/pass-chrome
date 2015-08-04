@@ -193,12 +193,12 @@ var GenerateView = (function() {
     this.togglePasswordView();
   }
   GenerateView.prototype = new View();
-  
+
   GenerateView.prototype.generatePassword = function() {
     var self = this;
     background.generatePassword(function(result){
       if (result && result.generated) {
-        self.passwordEl.value = result.generated; 
+        self.passwordEl.value = result.generated;
         self.passwordEl.focus();
         self.passwordEl.select();
       }
@@ -229,29 +229,28 @@ var BrowseView = (function() {
     this.searchEl = document.getElementById("search");
 
     this.searchEl.addEventListener('keyup', function(e) {
+      if (e.keyCode === 40) {
+        self.resultsEl.focus();
+        self.resultsEl.selectedIndex = 0;
+      }
+
       var term = e.target.value;
       if (term.length > 1) {
         self.render(term);
       }
     }, true);
 
-    this.resultsEl.addEventListener('click', function(e) {
-      var target = e.target;
-      var action = target.dataset.action;
-      while (!action || !target.tagName === "LI") {
-        target = target.parentElement;
-        action = target.dataset.action;
-      }
-
-      if (action) {
-        if (action === "fill") {
-          background.lookupAndFill(target.dataset.domain);
-        }
-        if (action === "edit") {
-          editExistingDomain(target.dataset.domain);
-        }
+    this.resultsEl.addEventListener('dblclick', function(e){
+      var target = BrowseView.getActionTarget(e);
+      editExistingDomain(target.dataset.domain);
+    }, true);
+    this.resultsEl.addEventListener('keyup', function(e){
+      if (e.keyCode === 13) {
+        var target = BrowseView.getActionTarget(e);
+        editExistingDomain(target.dataset.domain);
       }
     }, true);
+    this.resultsEl.addEventListener('change', BrowseView.changeResult, true);
   }
 
   BrowseView.prototype = new View();
@@ -261,23 +260,32 @@ var BrowseView = (function() {
     browseView.render();
   };
 
+  BrowseView.getActionTarget = function(e) {
+    var target = e.target;
+    if (target.tagName === "SELECT") {
+      target = target.selectedOptions[0];
+    }
+    return target;
+  };
+
+  BrowseView.changeResult = function(e) {
+    var target = BrowseView.getActionTarget(e);
+    var action = target.dataset.action;
+    if (action) {
+      if (action === "fill") {
+        background.lookupAndFill(target.dataset.domain);
+      }
+    }
+  };
+
   BrowseView.prototype.renderResult = function(result) {
-    var el = document.createElement("li");
+    var el = document.createElement("option");
     if (result === background.getCurrentDomainInfo().domain) {
       el.classList.add("detected-result");
     }
     el.dataset.action = "fill";
     el.dataset.domain = result;
-    el.title = result;
-    el.innerHTML = "<span class='result'>" + result + "</span>";
-
-    var viewBtn = document.createElement("a");
-    viewBtn.dataset.action = "edit";
-    viewBtn.dataset.domain = result;
-    viewBtn.classList.add("view-domain");
-    viewBtn.classList.add("fa");
-    viewBtn.classList.add("fa-edit");
-    el.appendChild(viewBtn);
+    el.innerHTML = result;
     return el;
   }
 
@@ -291,6 +299,7 @@ var BrowseView = (function() {
         self.resultsEl.appendChild(self.renderResult(result));
       });
     }
+    this.searchEl.focus();
   };
   return BrowseView;
 })();
